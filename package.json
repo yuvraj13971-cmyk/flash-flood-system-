@@ -1,0 +1,9 @@
+{
+  "name": "flash-flood-frontend",
+  "version": "1.0.0",
+  "description": "Static vanilla JS dashboard for the Flash Flood Prediction prototype. No build step required.",
+  "scripts": {
+    "start": "python3 -m http.server 5500"
+  },
+  "private": true
+}

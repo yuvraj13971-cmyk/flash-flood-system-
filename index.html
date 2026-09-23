@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash Flood Prediction System</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>🌧️ Flash Flood</h2>
+  <p>Prediction System <span class="proto-tag">PROTOTYPE</span></p>
+  <nav>
+    <a href="#" data-page="dashboard" class="nav-link active">🏠 Dashboard</a>
+    <a href="#" data-page="prediction" class="nav-link">🎯 Prediction</a>
+    <a href="#" data-page="analytics" class="nav-link">📈 Analytics</a>
+    <a href="#" data-page="map" class="nav-link">🗺️ Map</a>
+    <a href="#" data-page="models" class="nav-link">🧠 Models</a>
+    <a href="#" data-page="historical" class="nav-link">🛰️ 2022 Reference</a>
+    <a href="#" data-page="about" class="nav-link">ℹ️ About</a>
+  </nav>
+  <div class="sidebar-footer">
+    <span id="backend-status" class="status-pill status-unknown">Checking backend…</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="page-dashboard" class="page active">
+    <div class="header">
+      <div>
+        <h1>Flash Flood Prediction System</h1>
+        <p>Demonstration dashboard • Synthetic / simulated data</p>
+      </div>
+      <button id="simulate-btn" class="btn-primary">⚡ Simulate Live Data</button>
+    </div>
+
+    <div class="card-grid" id="param-cards">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="risk-alert-row">
+      <div class="card risk-card">
+        <h2>Flood Risk</h2>
+        <div class="risk-circle" id="risk-circle">
+          <strong id="risk-label">—</strong>
+        </div>
+        <p id="risk-prob-label">Run a prediction to see risk</p>
+      </div>
+      <div class="card alert-card" id="alert-card" style="display:none;">
+        <h3>⚠ FLOOD RISK ALERT</h3>
+        <p id="alert-text"></p>
+        <p class="disclaimer">Please monitor official local disaster-management advisories. This is a prototype, not an official warning system.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PREDICTION ============ -->
+  <section id="page-prediction" class="page">
+    <h1>Prediction</h1>
+    <p class="subtitle">Enter environmental readings and choose a model to predict flood risk.</p>
+
+    <div class="predict-layout">
+      <form class="card form-card" id="predict-form">
+        <label>Model
+          <select id="model-select">
+            <option value="random_forest">Random Forest</option>
+            <option value="xgboost">XGBoost</option>
+            <option value="logistic_regression">Logistic Regression</option>
+            <option value="svm">SVM</option>
+            <option value="decision_tree">Decision Tree</option>
+            <option value="ann">ANN (Neural Network)</option>
+          </select>
+        </label>
+        <label>Rainfall (mm/hr)
+          <input type="number" id="in-rainfall" value="120" min="0" max="300" step="0.1" required>
+        </label>
+        <label>Water Level (m)
+          <input type="number" id="in-water" value="7.5" min="0" max="15" step="0.01" required>
+        </label>
+        <label>Soil Moisture (%)
+          <input type="number" id="in-soil" value="82" min="0" max="100" step="0.1" required>
+        </label>
+        <label>Temperature (°C)
+          <input type="number" id="in-temp" value="27" min="-5" max="55" step="0.1" required>
+        </label>
+        <label>Humidity (%)
+          <input type="number" id="in-humidity" value="90" min="0" max="100" step="0.1" required>
+        </label>
+        <button type="submit" class="btn-primary">Predict Flood Risk</button>
+      </form>
+
+      <div class="card result-card" id="predict-result">
+        <h2>Prediction Result</h2>
+        <p class="muted">Submit the form to see a prediction.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2>Time-Series (LSTM) Prediction</h2>
+      <p class="muted">Uses the last 6 synthetic readings to predict the next-step risk trend. Prototype only — see the About page for data limitations.</p>
+      <button id="lstm-demo-btn" class="btn-secondary">Run LSTM Demo Sequence</button>
+      <div id="lstm-result"></div>
+    </div>
+  </section>
+
+  <!-- ============ ANALYTICS ============ -->
+  <section id="page-analytics" class="page">
+    <h1>Analytics</h1>
+    <p class="subtitle">Demonstration historical trends (synthetic data).</p>
+    <div class="chart-grid">
+      <div class="card"><h3>Rainfall Trend</h3><canvas id="chart-rainfall"></canvas></div>
+      <div class="card"><h3>Water Level Trend</h3><canvas id="chart-water"></canvas></div>
+      <div class="card"><h3>Soil Moisture Trend</h3><canvas id="chart-soil"></canvas></div>
+      <div class="card"><h3>Flood Risk Score Trend</h3><canvas id="chart-risk"></canvas></div>
+      <div class="card wide"><h3>Model Performance Comparison</h3><canvas id="chart-models"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ MAP ============ -->
+  <section id="page-map" class="page">
+    <h1>Risk Map</h1>
+    <p class="subtitle">Real Assam districts (the most-affected districts in the June 2022 NRSC flood report) shown as monitoring points — but the rainfall/water-level/risk values are SIMULATED for this demo, not live sensors.</p>
+    <div class="card">
+      <div id="leaflet-map"></div>
+    </div>
+    <p class="legend">🟢 Low &nbsp; 🟡 Moderate &nbsp; 🟠 High &nbsp; 🔴 Critical</p>
+  </section>
+
+  <!-- ============ MODELS ============ -->
+  <section id="page-models" class="page">
+    <h1>Model Comparison</h1>
+    <p class="subtitle">Metrics come from actual evaluation on a held-out test split of the synthetic dataset.</p>
+    <div class="card">
+      <table id="models-table">
+        <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1 Score</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ HISTORICAL REFERENCE ============ -->
+  <section id="page-historical" class="page">
+    <h1>2022 Assam Floods — Real Historical Reference</h1>
+    <p class="subtitle">
+      Real satellite-derived flood inundation data from NRSC/ISRO's rapid mapping
+      of the June 2022 Assam floods. Shown for geographic realism only —
+      this is a <strong>past event</strong>, not a live feed, and inundated
+      area (from SAR satellite imagery) is a different measurement from the
+      rainfall/water-level/soil-moisture inputs the ML models use.
+    </p>
+    <div class="card" id="historical-meta"></div>
+    <div class="card">
+      <table id="historical-table">
+        <thead><tr><th>District</th><th>Inundated Area (ha)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="page-about" class="page">
+    <h1>About This Prototype</h1>
+    <div class="card about-card">
+      <p><strong>This is a college demonstration prototype (SIH-style project).</strong> It shows a complete flow: environmental data → preprocessing → ML models → FastAPI backend → this dashboard.</p>
+      <ul>
+        <li>All training data is <strong>synthetic</strong>, generated to look realistic, not real sensor readings.</li>
+        <li>Model accuracy figures are computed by actually evaluating each model — nothing is hard-coded.</li>
+        <li>The LSTM module was trained on a small synthetic sequence dataset and is explicitly a proof-of-concept, not a validated time-series model.</li>
+        <li>Map locations use real Assam district names/coordinates from NRSC/ISRO's June 2022 flood report, but the rainfall/water-level/risk values shown for them are demo/simulated, not live sensor feeds.</li>
+        <li>The "2022 Reference" page shows real historical satellite-derived flood inundation data for context — it is a past event, not a live feed, and not the same kind of measurement as the ML model inputs.</li>
+        <li>No SMS/email alerts are sent — alerts are shown inside the app only.</li>
+        <li>This tool does not replace official disaster-management advisories.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
