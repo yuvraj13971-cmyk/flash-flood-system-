@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+backend/models/*.joblib
+backend/models/*.keras
+backend/models/*.npz
+backend/models/metrics.json
+backend/models/lstm_meta.json
+backend/data/*.csv
